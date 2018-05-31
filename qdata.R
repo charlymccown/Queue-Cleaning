@@ -3,8 +3,6 @@ install.packages("tidyverse")
 install.packages("tidyr")
 install.packages("stringr")
 
-
-
 # Load packages into accessible memory:
 # dplyr - filter, select, mutate, summarize, arrange
 # tidyr - gather, spread
@@ -19,8 +17,9 @@ library("stringr")
 qdata=read.csv("QCombined.csv")
 names(qdata) = c("Date Time In", "Email", "Name", "Location", "Course", "Concept", "Helped", "Helped Time", "Center", "Semester")
 
-# Clean course data
 
+
+# Clean course data
 # Remove all spaces
 qdirty = qdata %>% filter(str_detect(Course," "))
 qclean = qdata %>% filter(!str_detect(Course," "))
@@ -41,32 +40,56 @@ qdirty$upperCase=NULL #delete the old column
 rm(upperCase) #remove used variable
 newqdata=rbind(qdirty,qclean) #put the data back together
 
-#remove used variables
+#remove redundant variables
 rm(qdirty)
 rm(qclean)
+
+
 
 #create new files with clean and dirty data for each center
 #make a list of all existing centers by finding each unique center code
 centers = unique(newqdata$Center)
-
-#for all unique centers, create the new files
-check = function(information){
-  if(grepl("[[:upper:]][[:upper:]][[:upper:]][[:digit:]][[:digit:]][[:digit:]]", information[5])){
-    write.csv(information, file = paste(information[9], "Clean.csv", sep = "_"), append = TRUE)
-  }
-  else{
-    write.csv(information, file = paste(information[9], "Dirty.csv", sep = "_"), append = TRUE)
-  }
+#create a new clean and dirty dataframe for each center
+for(centername in centers){
+  #make a new data frame for the given center
+  centerFrame = newqdata %>% filter(str_detect(Center,centername))
+  
+  #from that data frame, separate the clean from the dirty into two more data frames
+  centerFrameClean = centerFrame  %>% filter(grepl("^[[:upper:]][[:upper:]][[:upper:]][[:digit:]][[:digit:]][[:digit:]]$", Course))
+  centerFrameDirty = centerFrame  %>% filter(!grepl("^[[:upper:]][[:upper:]][[:upper:]][[:digit:]][[:digit:]][[:digit:]]$", Course))
+  
+  #write the resulting data frames to csv files
+  write.csv(centerFrameClean, file = paste(centername, "Clean.csv", sep = "_"))
+  write.csv(centerFrameDirty, file = paste(centername, "Dirty.csv", sep = "_"))
 }
 
-
-apply(newqdata, 1, check)
-
-
-
-
+#remove redundant varaibles
+rm(centerFrame)
+rm(centerFrameClean)
+rm(centerFrameDirty)
 
 
+
+#for all unique centers, create the new files
+#write a funtion that will check if the data is clean or dirty, then write it to the file
+# check = function(information){
+#   if(grepl("[[:upper:]][[:upper:]][[:upper:]][[:digit:]][[:digit:]][[:digit:]]", information[5])){
+#     write.csv(information, file = paste(information[9], "Clean.csv", sep = "_"))
+#   }
+#   else{
+#     write.csv(information, file = paste(information[9], "Dirty.csv", sep = "_"))
+#   }
+# }
+# 
+# 
+# apply(newqdata, 1, check)
+
+
+
+
+
+#make a list of all existing centers by finding each unique center code
+#centers = unique(newqdata$Center)
 
 # #define the function to separate clean and dirty entries and paste the rows to their respective files
 # f = function(x, newCenterName, output1, output2){
@@ -118,5 +141,7 @@ rm(centers)
 # cbind()
 # apply()
 # rm()
+
+
 
 
