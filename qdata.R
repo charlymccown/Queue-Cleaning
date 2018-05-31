@@ -47,35 +47,52 @@ rm(qclean)
 
 #create new files with clean and dirty data for each center
 #make a list of all existing centers by finding each unique center code
-centers = unique(qdata$Center)
+centers = unique(newqdata$Center)
 
 #for all unique centers, create the new files
-
-#define the function to separate clean and dirty entries and paste the rows to their respective files
-f = function(x, newCenterName, output1, output2){
-  if(x[9] == centerName){
-    #if the data is clean, add it to the clean data file
-    if(grepl("[[:upper:]][[:upper:]][[:upper:]][[:digit:]][[:digit:]][[:digit:]]", x[5]))
-      cat(paste(x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10], sep=","), file = output1, append = TRUE, fill = TRUE)
-    #otherwise the data is dirty, add it to the dirty data file
-    else
-      cat(paste(x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10], sep=","), file = output2, append = TRUE, fill = TRUE)
+check = function(information){
+  if(grepl("[[:upper:]][[:upper:]][[:upper:]][[:digit:]][[:digit:]][[:digit:]]", information[5])){
+    write.csv(information, file = paste(information[9], "Clean.csv", sep = "_"), append = TRUE)
+  }
+  else{
+    write.csv(information, file = paste(information[9], "Dirty.csv", sep = "_"), append = TRUE)
   }
 }
 
-#for every unique center, apply the function to each row in qdata
-for(centerName in centers){
-  #create the new filenames based on center
-  centerNameClean = paste(centerName, "Clean.csv", sep = "_")
-  centerNameDirty = paste(centerName, "Dirty.csv", sep = "_")
-  
-  #Add the label row to each file
-  cat(paste("Date Time In", "Email", "Name", "Location", "Course", "Concept", "Helped", "Helped Time", "Center", "Semester",sep=","), file = centerNameClean, fill = TRUE)
-  cat(paste("Date Time In", "Email", "Name", "Location", "Course", "Concept", "Helped", "Helped Time", "Center", "Semester",sep=","), file = centerNameDirty, fill = TRUE)
-  
-  #apply the function with respective clean and dirty output files
-  apply(qdata, 1, f, newCenterName = centerName, output1 = centerNameClean, output2 = centerNameDirty)
-}
+
+apply(newqdata, 1, check)
+
+
+
+
+
+
+
+# #define the function to separate clean and dirty entries and paste the rows to their respective files
+# f = function(x, newCenterName, output1, output2){
+#   if(x[9] == centerName){
+#     #if the data is clean, add it to the clean data file
+#     if(grepl("[[:upper:]][[:upper:]][[:upper:]][[:digit:]][[:digit:]][[:digit:]]", x[5]))
+#       cat(paste(x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10], sep=","), file = output1, append = TRUE, fill = TRUE)
+#     #otherwise the data is dirty, add it to the dirty data file
+#     else
+#       cat(paste(x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10], sep=","), file = output2, append = TRUE, fill = TRUE)
+#   }
+# }
+# 
+# #for every unique center, apply the function to each row in qdata
+# for(centerName in centers){
+#   #create the new filenames based on center
+#   centerNameClean = paste(centerName, "Clean.csv", sep = "_")
+#   centerNameDirty = paste(centerName, "Dirty.csv", sep = "_")
+#   
+#   #Add the label row to each file
+#   cat(paste("Date Time In", "Email", "Name", "Location", "Course", "Concept", "Helped", "Helped Time", "Center", "Semester",sep=","), file = centerNameClean, fill = TRUE)
+#   cat(paste("Date Time In", "Email", "Name", "Location", "Course", "Concept", "Helped", "Helped Time", "Center", "Semester",sep=","), file = centerNameDirty, fill = TRUE)
+#   
+#   #apply the function with respective clean and dirty output files
+#   apply(qdata, 1, f, newCenterName = centerName, output1 = centerNameClean, output2 = centerNameDirty)
+# }
 
 rm(centerName)
 rm(centerNameClean)
@@ -101,4 +118,5 @@ rm(centers)
 # cbind()
 # apply()
 # rm()
+
 
